@@ -3,6 +3,8 @@
     package="com.qzk.picturehandlersample">
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <use-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"></use-permission>
+    <use-permission android:name="android.permission.RESTART_PACKAGES"></use-permission>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -18,7 +20,13 @@
             </intent-filter>
         </activity>
         <activity android:name=".CommonCaramActivity"/>
-        <activity android:name=".WBClipPictureActivity"/>
+        <activity android:name=".SecondActivity">
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
+
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
+        </activity>
     </application>
 
 </manifest>

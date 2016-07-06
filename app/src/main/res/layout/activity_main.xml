@@ -25,11 +25,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/getSignal"
-            android:text="相册(单选)"/>
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/getMut"
-            android:text="相册(多选)"/>
+            android:text="相册"/>
     </LinearLayout>
 </RelativeLayout>

@@ -57,16 +57,13 @@ public class CommonCaramActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        LogUtils.e("sssssssssssssssss>"+mImagePath);
         outState.putString("path", mImagePath);
 
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        LogUtils.e("orientationChanged==========>"+newConfig.orientation);
         newConfig.orientation = Configuration.ORIENTATION_PORTRAIT;
-        LogUtils.e("orientationSet==========>"+newConfig.orientation);
         super.onConfigurationChanged(newConfig);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }

@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
@@ -13,17 +15,21 @@ import android.view.View;
 import android.widget.Button;
 
 import com.qzk.picturehandlersample.adapters.MyImageAdapter;
-import com.qzk.picturehandlersample.entitys.Model;
+import com.qzk.picturehandlersample.callback.HandlerPicture;
 import com.qzk.picturehandlersample.utils.CaramUtils;
 import com.qzk.picturehandlersample.utils.ImageUtils;
 import com.qzk.picturehandlersample.utils.LogUtils;
+import com.qzk.picturehandlersample.utils.PermissionUtils;
+import com.qzk.picturehandlersample.utils.PictureHandler;
+import com.qzk.picturehandlersample.utils.SDCardUtils;
+import com.qzk.picturehandlersample.utils.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends Activity{
+public class MainActivity extends Activity {
     private Activity mActivity = MainActivity.this;
-    private List<Model> mDatas = new ArrayList<>();
+    private List<String> mDatas = new ArrayList<>();
     private MyImageAdapter mAdapter;
     private String path = "";
 
@@ -33,6 +39,7 @@ public class MainActivity extends Activity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+        PermissionUtils.getCameraPermissions(mActivity);
     }
 
     private void initView() {
@@ -42,7 +49,6 @@ public class MainActivity extends Activity{
         pics.setAdapter(mAdapter);
         Button take = (Button) findViewById(R.id.take);
         Button getSignal = (Button) findViewById(R.id.getSignal);
-        Button getMut = (Button) findViewById(R.id.getMut);
         take.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,17 +61,10 @@ public class MainActivity extends Activity{
                 getPic();
             }
         });
-        getMut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getMutPicture();
-
-            }
-        });
     }
 
     private void takePic() {
-        Intent intent = new Intent(mActivity,CommonCaramActivity.class);
+        Intent intent = new Intent(mActivity, CommonCaramActivity.class);
         startActivityForResult(intent, CaramUtils.REQUESTCODE_CARAM);
     }
 
@@ -73,118 +72,59 @@ public class MainActivity extends Activity{
         CaramUtils.toGetPicture(mActivity);
     }
 
-    private void getMutPicture() {
-        CaramUtils.toGetMultPicture(mActivity);
-
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
+            String path = "";
             if (requestCode == CaramUtils.REQUESTCODE_CARAM) {
-                String pa = data.getStringExtra("path");
-                new HandleCroupPictureThread(pa).start();
+                path = data.getStringExtra("path");
+
             } else if (requestCode == CaramUtils.REQUESTCODE_PICTURE) {
-                String p = ImageUtils.uriToPath(mActivity, data.getData());
-                new HandleCroupPictureThread(p).start();
-            } else if(requestCode == CaramUtils.REQUESTCODE_PICTUREMULT){
-//                String[] all_path = data.getStringArrayExtra("all_path");
-//                int length = all_path.length;
-//                if (length != 0) {
-//                    for (int i = 0; i < length; i++) {
-//                        mDatas.add(all_path[i]);
-//                    }
-//                    mAdapter.notifyDataSetChanged();
-//                }
+                path = ImageUtils.uriToPath(mActivity, data.getData());
             }
-            else if (requestCode == CaramUtils.REQUESTCODE_CLIP) {
-                LogUtils.e("===========>C++++++++++" + data.getStringExtra("path"));
-                new HandleCaramPictureThread(data.getStringExtra("path")).start();
+            if (!path.equals("")) {
+                handlerImage(path);
             }
         }
     }
 
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            String path = msg.getData().get("path").toString();
-            switch (msg.what) {
-                case 1: {
-                    Model model = new Model();
-                    model.setPath(path);
-                    model.setOriginalSize(100l);
-                    model.setCompressSize(10l);
-                    mDatas.add(model);
-                    mAdapter.notifyDataSetChanged();
-                }
-                break;
-                case 2: {
-                    CaramUtils.toCroupPicture(mActivity, path);
-                }
-                break;
-            }
 
-        }
-    };
-
-    public class HandleCroupPictureThread extends Thread {
-        private String path;
-
-        public HandleCroupPictureThread(String path) {
-            this.path = path;
-        }
-
-        @Override
-        public void run() {
-            super.run();
-            String path = CaramUtils.handleImageBeforeToCroup(this.path);
-            Message message = new Message();
-            Bundle bundle = new Bundle();
-            bundle.putString("path", path);
-            message.setData(bundle);
-            message.what = 2;
-            handler.sendMessage(message);
-        }
-    }
-
-    public class HandleCaramPictureThread extends Thread {
-
-        private String path;
-
-        public HandleCaramPictureThread(String path) {
-            this.path = path;
-        }
-
-        @Override
-        public void run() {
-            super.run();
-            String path = CaramUtils.resetCaramPicture(this.path);
-            Message message = new Message();
-            Bundle bundle = new Bundle();
-            bundle.putString("path", path);
-            message.setData(bundle);
-            message.what = 1;
-            handler.sendMessage(message);
-
-        }
-    }
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        LogUtils.e("orientationChanged==========>"+newConfig.orientation);
+        LogUtils.e("orientationChanged==========>" + newConfig.orientation);
         newConfig.orientation = Configuration.ORIENTATION_PORTRAIT;
-        LogUtils.e("orientationSet==========>"+newConfig.orientation);
+        LogUtils.e("orientationSet==========>" + newConfig.orientation);
         super.onConfigurationChanged(newConfig);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
     @Override
     protected void onResume() {
-        if(getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT){
+        if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
         super.onResume();
 
     }
+
+    private void handlerImage(String path) {
+
+        PictureHandler.pictureHandler(mActivity, path, new HandlerPicture() {
+            @Override
+            public void success(String path) {
+                LogUtils.e("success");
+                mDatas.add(path);
+                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void error(String message) {
+                LogUtils.e("error");
+                ToastUtils.showLongToast(message);
+            }
+        });
+    }
+
 }

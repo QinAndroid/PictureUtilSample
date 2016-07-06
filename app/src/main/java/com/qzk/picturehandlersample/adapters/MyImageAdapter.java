@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 
 import com.qzk.picturehandlersample.R;
-import com.qzk.picturehandlersample.entitys.Model;
 import com.qzk.picturehandlersample.utils.ImageLoaderUtils;
 
 import java.util.List;
@@ -21,8 +20,8 @@ import java.util.List;
  * Created by QZK on 2016/5/11.
  */
 public class MyImageAdapter extends RecyclerView.Adapter<MyImageAdapter.ViewHolder>{
-    private List<Model> mDatas;
-    public MyImageAdapter(List<Model> data){
+    private List<String> mDatas;
+    public MyImageAdapter(List<String> data){
         this.mDatas = data;
     }
     @Override
@@ -33,14 +32,7 @@ public class MyImageAdapter extends RecyclerView.Adapter<MyImageAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(MyImageAdapter.ViewHolder holder, int position) {
-        Model model = this.mDatas.get(position);
-        String path = model.getPath();
-        Long original = model.getOriginalSize();
-        Long compress = model.getCompressSize();
-        holder.item_original.setText("原始大小:"+original);
-        holder.item_compress.setText("压缩后大小:"+compress);
-        ImageLoaderUtils.displayImageFromSDCard(path,holder.item_image);
-//        ImageLoaderUtils.displayImageFromDrawable(R.mipmap.ic_launcher,holder.item_image);
+        ImageLoaderUtils.displayImageFromSDCard(this.mDatas.get(position),holder.item_image);
 
     }
 

@@ -1,5 +1,6 @@
 package com.qzk.picturehandlersample.utils;
 
+//import android.view.View;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -33,7 +34,7 @@ public class ImageLoaderUtils {
      */
     public static void displayImageFromSDCard(String path, final ImageView imageView){
         //path "file:///mnt/sdcard/image.png"; // from SD card
-//        ImageLoader.getInstance().displayImage("file://"+path,imageView,MyApplication.options);
+        ImageLoader.getInstance().displayImage("file://"+path,imageView,MyApplication.options);
         ImageLoader.getInstance().displayImage("file://" + path,
                 imageView,MyApplication.options, new SimpleImageLoadingListener() {
                     @Override
