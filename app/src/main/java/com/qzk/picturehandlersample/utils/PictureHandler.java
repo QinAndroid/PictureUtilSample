@@ -48,17 +48,31 @@ public class PictureHandler {
 
     private static Result handler(String path) {
         Result result = new Result();
-        Bitmap bitmap = ImageUtils.getBitmapByPath(path);
-        bitmap = ImageUtils.massCompress(bitmap);
-        int angle = ImageUtils.getImageAgree(path);
-        bitmap = ImageUtils.rotateBitmap(bitmap, angle);
+        String p = SDCardUtils.getSDCardPath() + "/WB";
         try {
-            String p = SDCardUtils.getSDCardPath() + "/WB";
             File dirFile = new File(p);
             if (!dirFile.exists()) {
                 dirFile.mkdirs();
             }
-            File mediaFile = new File(dirFile.getAbsolutePath() + File.separator + (ConstantUtils.PICTUREPREFIX + System.currentTimeMillis()) + ".jpg");
+            Bitmap bitmap = ImageUtils.getBitmapByPath(path);
+//            File firstFile = new File(dirFile.getAbsolutePath() + File.separator + ("分辨率压缩" + System.currentTimeMillis()) + ".jpg");
+//            if (firstFile.exists()) {
+//                firstFile.delete();
+//            }
+//            firstFile.createNewFile();
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(firstFile));
+            bitmap = ImageUtils.massCompress(bitmap);
+//            File secondFile = new File(dirFile.getAbsolutePath() + File.separator + ("质量压缩" + System.currentTimeMillis()) + ".jpg");
+//            if (secondFile.exists()) {
+//                secondFile.delete();
+//            }
+//            secondFile.createNewFile();
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(secondFile));
+            int angle = ImageUtils.getImageAgree(path);
+            bitmap = ImageUtils.rotateBitmap(bitmap, angle);
+
+
+            File mediaFile = new File(dirFile.getAbsolutePath() + File.separator + ("最终压缩" + System.currentTimeMillis()) + ".jpg");
             if (mediaFile.exists()) {
                 mediaFile.delete();
             }
@@ -68,7 +82,7 @@ public class PictureHandler {
             //释放bitmap
             ImageUtils.releaseBitmap(bitmap);
             //删除原文件
-            ImageUtils.deletePic(path);
+//            ImageUtils.deletePic(path);
             result.setMessage(message);
             if (SUCCESS.equals(message)) {
                 result.setPath(finalPath);

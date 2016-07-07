@@ -37,23 +37,23 @@ public class ImageUtils {
      * @return
      */
     public static Bitmap getBitmapByPath(String path) {
-        int w = 768;
-        int h = 1280;
+//        int w = 480;
+//        int h = 800;
 //        1920*1080
         BitmapFactory.Options opts = new BitmapFactory.Options();
         // 设置为ture只获取图片大小
         opts.inJustDecodeBounds = true;
-        opts.inPreferredConfig = Bitmap.Config.ALPHA_8;
+        opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
         // 返回为空
         BitmapFactory.decodeFile(path, opts);
         int width = opts.outWidth;
         int height = opts.outHeight;
         float scaleWidth = 0.f, scaleHeight = 0.f;
-        if (width > w || height > h) {
-            // 缩放
-            scaleWidth = ((float) width) / w;
-            scaleHeight = ((float) height) / h;
-        }
+//        if (width > w || height > h) {
+//            // 缩放
+//            scaleWidth = ((float) width) / w;
+//            scaleHeight = ((float) height) / h;
+//        }
         opts.inJustDecodeBounds = false;
         float scale = Math.max(scaleWidth, scaleHeight);
         opts.inSampleSize = (int) scale;
@@ -61,7 +61,9 @@ public class ImageUtils {
         Bitmap b = weak.get();
         int ww = b.getWidth();
         int hh = b.getHeight();
-        return Bitmap.createScaledBitmap(weak.get(), ww/2, hh/2, true);
+        int ra = getRatioSize(ww,hh);
+        LogUtils.e("ra------->"+ra);
+        return Bitmap.createScaledBitmap(weak.get(), ww/ra, hh/ra, true);
 
 
     }
@@ -80,6 +82,9 @@ public class ImageUtils {
         int options = 100;
         LogUtils.e("length-->" + baos.toByteArray().length / 1024);
         while (baos.toByteArray().length / 1024 > 100) { // 循环判断如果压缩后图片是否大于100kb,大于继续压缩
+            if(options<=10){
+                break;
+            }
             baos.reset();// 重置baos即清空baos
             options = options - 10;// 每次都减少10
             image.compress(Bitmap.CompressFormat.JPEG, options, baos);// 这里压缩options%，把压缩后的数据存放到baos中
@@ -150,6 +155,26 @@ public class ImageUtils {
         if (flie.exists()) {
             flie.delete();
         }
+    }
+
+    public static int getRatioSize(int bitWidth, int bitHeight) {
+        // 图片最大分辨率
+        int imageHeight = 1280;
+        int imageWidth = 960;
+        // 缩放比
+        int ratio = 1;
+        // 缩放比,由于是固定比例缩放，只用高或者宽其中一个数据进行计算即可
+        if (bitWidth > bitHeight && bitWidth > imageWidth) {
+            // 如果图片宽度比高度大,以宽度为基准
+            ratio = bitWidth / imageWidth;
+        } else if (bitWidth < bitHeight && bitHeight > imageHeight) {
+            // 如果图片高度比宽度大，以高度为基准
+            ratio = bitHeight / imageHeight;
+        }
+        // 最小比率为1
+        if (ratio <= 0)
+            ratio = 1;
+        return ratio;
     }
 
     /**

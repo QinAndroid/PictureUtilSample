@@ -110,7 +110,6 @@ public class MainActivity extends Activity {
     }
 
     private void handlerImage(String path) {
-
         PictureHandler.pictureHandler(mActivity, path, new HandlerPicture() {
             @Override
             public void success(String path) {
